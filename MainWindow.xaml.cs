@@ -12,6 +12,16 @@ namespace GraffitiAnimation
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Czekaj na zakończenie animacji (3 sekundy + 0.5 sekundy zapasu)
+            await System.Threading.Tasks.Task.Delay(3500);
+            CaptureAnimationToGif(DrawingCanvas, "output.gif", 100, 3);
+            // Zamknij aplikację po wygenerowaniu GIF-a (dla CI/CD)
+            Close();
         }
 
         private void SaveAsGif_Click(object sender, RoutedEventArgs e)
@@ -62,7 +72,7 @@ namespace GraffitiAnimation
 
                 // Zapisz GIF-a
                 collection.Write(outputPath);
-                MessageBox.Show($"GIF zapisany jako {outputPath}");
+                MessageBox.Show($"GIF zapisany jako {outputPath}", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
     }
