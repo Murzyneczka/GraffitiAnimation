@@ -1,0 +1,38 @@
+<Window x:Class="GraffitiAnimation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pill Crew Wildstyle" Height="400" Width="600">
+    <Grid Background="White">
+        <Canvas x:Name="DrawingCanvas" Width="600" Height="400">
+            <!-- Krok 1: szkic bazowy -->
+            <Path x:Name="Step1" Stroke="Black" StrokeThickness="2" Data="M10,100 L100,100 L100,150 L10,150 Z" Opacity="0"/>
+            <!-- Krok 2: dodanie ostrych narożników -->
+            <Path x:Name="Step2" Stroke="Black" StrokeThickness="2" Data="M110,100 L190,80 L200,130 L120,150 Z" Opacity="0"/>
+            <!-- Krok 3: dodanie strzałek i kick outów -->
+            <Path x:Name="Step3" Stroke="Black" StrokeThickness="2" Data="M210,150 L260,100 L280,120 L230,170 Z" Opacity="0"/>
+            <!-- Krok 4: przecięcia i pęknięcia -->
+            <Path x:Name="Step4" Stroke="Black" StrokeThickness="2" Data="M290,100 L350,90 L340,140 L280,150 Z" Opacity="0"/>
+            <!-- Krok 5: pogrubienie konturów -->
+            <Path x:Name="Step5" Stroke="Black" StrokeThickness="4" Data="M360,100 L420,80 L430,130 L370,150 Z" Opacity="0"/>
+            <!-- Krok 6: cienie i detale -->
+            <Path x:Name="Step6" Stroke="Black" StrokeThickness="2" Data="M440,140 L490,100 L510,120 L460,160 Z" Opacity="0"/>
+        </Canvas>
+        <Button Content="Zapisz GIF" Width="100" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="SaveAsGif_Click"/>
+
+        <Window.Triggers>
+            <EventTrigger RoutedEvent="Window.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <!-- Animacja pojawiania się kolejnych kroków -->
+                        <DoubleAnimation Storyboard.TargetName="Step1" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" />
+                        <DoubleAnimation Storyboard.TargetName="Step2" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.5" Duration="0:0:0.5" />
+                        <DoubleAnimation Storyboard.TargetName="Step3" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:1" Duration="0:0:0.5" />
+                        <DoubleAnimation Storyboard.TargetName="Step4" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:1.5" Duration="0:0:0.5" />
+                        <DoubleAnimation Storyboard.TargetName="Step5" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:2" Duration="0:0:0.5" />
+                        <DoubleAnimation Storyboard.TargetName="Step6" Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:2.5" Duration="0:0:0.5" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Window.Triggers>
+    </Grid>
+</Window>

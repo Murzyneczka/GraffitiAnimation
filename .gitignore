@@ -1,0 +1,14 @@
+# Visual Studio
+bin/
+obj/
+*.suo
+*.user
+*.sln.docstates
+
+# NuGet
+packages/
+
+# Wygenerowane pliki
+*.gif
+*.exe
+*.pdb
