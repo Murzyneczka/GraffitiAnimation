@@ -17,11 +17,9 @@ namespace GraffitiAnimation
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Czekaj na zakończenie animacji (3 sekundy + 0.5 sekundy zapasu)
-            await System.Threading.Tasks.Task.Delay(3500);
+            await System.Threading.Tasks.Task.Delay(3500); // Czekaj na zakończenie animacji
             CaptureAnimationToGif(DrawingCanvas, "output.gif", 100, 3);
-            // Zamknij aplikację po wygenerowaniu GIF-a (dla CI/CD)
-            Close();
+            Close(); // Zamknij aplikację po wygenerowaniu GIF-a
         }
 
         private void SaveAsGif_Click(object sender, RoutedEventArgs e)
@@ -33,46 +31,29 @@ namespace GraffitiAnimation
         {
             int width = (int)canvas.Width;
             int height = (int)canvas.Height;
-
-            // Oblicz liczbę klatek
             int totalFrames = (int)(animationDurationSeconds * 1000 / frameDelayMs);
 
             using (var collection = new MagickImageCollection())
             {
-                // Przechwytywanie klatek
                 for (int i = 0; i < totalFrames; i++)
                 {
-                    // Renderuj klatkę
                     var renderBitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
                     renderBitmap.Render(canvas);
-
-                    // Zapisz klatkę do strumienia
                     using (var stream = new System.IO.MemoryStream())
                     {
                         var encoder = new PngBitmapEncoder();
                         encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
                         encoder.Save(stream);
                         stream.Position = 0;
-
-                        // Dodaj klatkę do GIF-a
                         var magickImage = new MagickImage(stream);
-                        magickImage.AnimationDelay = frameDelayMs / 10; // Magick.NET używa 1/100 sekundy
+                        magickImage.AnimationDelay = frameDelayMs / 10;
                         collection.Add(magickImage);
                     }
-
-                    // Odczekaj przed kolejną klatką
                     System.Threading.Thread.Sleep(frameDelayMs);
                 }
-
-                // Ustaw zapętlanie GIF-a (0 = nieskończone)
                 collection[0].AnimationIterations = 0;
-
-                // Optymalizuj GIF-a
                 collection.Optimize();
-
-                // Zapisz GIF-a
                 collection.Write(outputPath);
-                MessageBox.Show($"GIF zapisany jako {outputPath}", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
     }
