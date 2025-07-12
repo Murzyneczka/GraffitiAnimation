@@ -25,15 +25,15 @@ jobs:
 
     # 3. Zainstaluj zależności NuGet
     - name: Restore dependencies
-      run: dotnet restore /GraffitiAnimation.csproj
+      run: dotnet restore GraffitiAnimation.csproj
 
     # 4. Skompiluj projekt
     - name: Build project
-      run: dotnet build /GraffitiAnimation.csproj --configuration Release --no-restore
+      run: dotnet build GraffitiAnimation.csproj --configuration Release --no-restore
 
     # 5. Uruchom aplikację i wygeneruj GIF
     - name: Run application and generate GIF
-      run: dotnet run --project /GraffitiAnimation.csproj --configuration Release
+      run: dotnet run --project GraffitiAnimation.csproj --configuration Release
       env:
         DISPLAY: ':0' # Wymagane dla headless rendering na Windows (jeśli potrzebne)
 
