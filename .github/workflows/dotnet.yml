@@ -35,12 +35,20 @@ jobs:
     - name: Run application and generate GIF
       run: dotnet run --project GraffitiAnimation.csproj --configuration Release
       env:
-        DISPLAY: ':0' # Wymagane dla headless rendering na Windows (jeśli potrzebne)
+        DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true # Może pomóc w problemach z renderowaniem
 
-    # 6. Prześlij wygenerowany GIF jako artefakt
+    # 6. Sprawdź, czy GIF został wygenerowany
+    - name: Check GIF existence
+      run: |
+        if (-not (Test-Path bin/Release/net6.0-windows/output.gif)) {
+          Write-Error "GIF file not found!"
+          exit 1
+        }
+
+    # 7. Prześlij wygenerowany GIF jako artefakt
     - name: Upload GIF artifact
       uses: actions/upload-artifact@v4
       with:
         name: output-gif
         path: bin/Release/net6.0-windows/output.gif
-        if-no-files-found: warn
+        if-no-files-found: error
