@@ -1,8 +1,10 @@
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.IO;
+using System.Diagnostics;
 using ImageMagick;
 
 namespace GraffitiAnimation
@@ -14,46 +16,57 @@ namespace GraffitiAnimation
             InitializeComponent();
             Loaded += MainWindow_Loaded;
         }
-
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            await System.Threading.Tasks.Task.Delay(3500); // Czekaj na zakończenie animacji
-            CaptureAnimationToGif(DrawingCanvas, "output.gif", 100, 3);
-            Close(); // Zamknij aplikację po wygenerowaniu GIF-a
-        }
-
         private void SaveAsGif_Click(object sender, RoutedEventArgs e)
         {
-            CaptureAnimationToGif(DrawingCanvas, "output.gif", 100, 3);
+            Canvas drawingCanvas = this.FindName("DrawingCanvas") as Canvas;
+            if (drawingCanvas == null) return;
+
+            int fps = 30; // Liczba klatek na sekundę
+            double totalDuration = 3.0; // Całkowity czas animacji w sekundach (z XAML: 2.5 + 0.5)
+            int totalFrames = (int)(totalDuration * fps);
+
+            // Renderowanie każdej klatki
+            for (int frame = 0; frame < totalFrames; frame++)
+            {
+                double time = frame / (double)fps;
+                RenderFrame(drawingCanvas, time, frame);
+            }
+
+            // Połączenie w GIF za pomocą ImageMagick
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "convert",
+                Arguments = $"-delay 10 -loop 0 frame_*.png output.gif",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            Process process = Process.Start(psi);
+            process.WaitForExit();
+
+            // Usunięcie tymczasowych plików
+            for (int frame = 0; frame < totalFrames; frame++)
+            {
+                File.Delete($"frame_{frame:03d}.png");
+            }
+
+            MessageBox.Show("Plik output.gif został wygenerowany!");
         }
 
-        private void CaptureAnimationToGif(Canvas canvas, string outputPath, int frameDelayMs, double animationDurationSeconds)
+        private void RenderFrame(Canvas canvas, double time, int frameIndex)
         {
-            int width = (int)canvas.Width;
-            int height = (int)canvas.Height;
-            int totalFrames = (int)(animationDurationSeconds * 1000 / frameDelayMs);
+            // Tworzenie kopii wizualnej sceny
+            canvas.UpdateLayout();
+            RenderTargetBitmap rtb = new RenderTargetBitmap(
+                (int)canvas.ActualWidth, (int)canvas.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(canvas);
 
-            using (var collection = new MagickImageCollection())
+            // Zapis do pliku
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+            using (var stream = File.Create($"frame_{frameIndex:03d}.png"))
             {
-                for (int i = 0; i < totalFrames; i++)
-                {
-                    var renderBitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-                    renderBitmap.Render(canvas);
-                    using (var stream = new System.IO.MemoryStream())
-                    {
-                        var encoder = new PngBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-                        encoder.Save(stream);
-                        stream.Position = 0;
-                        var magickImage = new MagickImage(stream);
-                        magickImage.AnimationDelay = frameDelayMs / 10;
-                        collection.Add(magickImage);
-                    }
-                    System.Threading.Thread.Sleep(frameDelayMs);
-                }
-                collection[0].AnimationIterations = 0;
-                collection.Optimize();
-                collection.Write(outputPath);
+                encoder.Save(stream);
             }
         }
     }
